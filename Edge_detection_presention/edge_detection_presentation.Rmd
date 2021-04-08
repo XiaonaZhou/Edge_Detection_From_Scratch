@@ -38,7 +38,7 @@ Let's say we have a 6x6 matrix and a 3x3 filter. To perform convolutional operat
 **Let's see some simple edge detection examples in Python.**
 
 
-Switch to Jupyter notebook
+[Jupyter notebook](https://github.com/XiaonaZhou/Edge_Detection_From_Scratch/blob/main/Simple_Edge_Detection_Demonstration_in_Python/Edge%20Detection%20demonstration%20.ipynb)
 
 
 **Now, we know what convolutional operation is, let's get started on detecting the edges.**
