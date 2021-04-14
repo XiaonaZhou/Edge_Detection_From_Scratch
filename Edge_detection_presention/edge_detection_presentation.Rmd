@@ -16,6 +16,7 @@ library(EBImage)
 library(png)
 library(jpeg)
 library(pracma)
+library(Matrix)
 ```
 
 # Edge detection through convolutional operation
@@ -255,22 +256,17 @@ edge_detect <- function(image_name, type = c("jpeg", "png"),filter=c("Prewitt", 
   
   # define filters 
   if (filter == "Prewitt"){
-    vertical_filter <- flipdim(matrix(c(1,1,1, 0,0,0,-1,-1,-1),3,3),1)
-    vertical_filter <- flipdim(vertical_filter,2)
+    vertical_filter <- matrix(c(1,1,1, 0,0,0,-1,-1,-1),3,3)
     horizontal_filter <- t(vertical_filter)
   }else if (filter == "Sobel"){
-    vertical_filter <- flipdim(matrix(c(1,2,1, 0,0,0,-1,-2,-1),3,3),1)
-    vertical_filter <- flipdim(vertical_filter,2)
+    vertical_filter <- matrix(c(1,2,1, 0,0,0,-1,-2,-1),3,3)
     horizontal_filter <- t(vertical_filter)
   }else if (filter == "Scharr"){
-    vertical_filter <- flipdim(matrix(c(3,10,3, 0,0,0,-3,-10,-3),3,3),1)
-    vertical_filter <- flipdim(vertical_filter,2)
+    vertical_filter <- matrix(c(3,10,3, 0,0,0,-3,-10,-3),3,3)
     horizontal_filter <- t(vertical_filter)
-  }
-  else{
+  }else{
     if (class(filter) == c("matrix","array") & dim(filter)[1]==dim(filter)[2]){
-      vertical_filter <- flipdim(filter,1)
-      vertical_filter <- flipdim(vertical_filter,2)
+      vertical_filter <- filter
       horizontal_filter <- t(vertical_filter)
     }
     else{
@@ -336,12 +332,16 @@ filter1
 
 display_mt(edge_detect("minions2.jpeg", type = "jpeg", filter = filter1))
 ```
+
+
 ```{r warning=FALSE}
 filter1 <- matrix(c(4,5,6,0,0,0,-5,-6,-7),3,3)
 filter1
 
 display_mt(edge_detect("minions2.jpeg", type = "jpeg", filter = filter1))
 ```
+
+
 ```{r warning=FALSE}
 filter1 <- matrix(c(1,2,3,0,0,0,4,5,6),3,3)
 filter1
@@ -382,8 +382,7 @@ Gaussian filter is defined as
 $$g(x,y)=\frac{1}{2\pi\sigma^2}e^{-\frac{(x)^2+(y)^2}{2\sigma^2}}$$
 
 ```{r include=FALSE}
- 
-Gaussian_blur_1 <-function(size, sigma){
+Gaussian_filter <-function(size, sigma){
   k <- size %/% 2
   # Xs are centered around zero instead of starting from 0
   # one of the reason is that when starting from 0, the resulting image is too dark
@@ -396,7 +395,7 @@ Gaussian_blur_1 <-function(size, sigma){
 
 
 ```{r}
-Gaussian_blur_1(5,1.4)
+Gaussian_filter(5,1.4)
 ```
 
 
@@ -433,15 +432,15 @@ gaus_blur_ope <- function(img, filter){
   c <- dimension[3]
   
   # Zero padding 
-  zeros_row <- zeros(1,m)
-  padded_row_img <- rbind(rbind(rbind(zeros_row,rbind(zeros_row, img[,,1])), zeros_row),zeros_row)
-  zeros_col <- zeros(dim(padded_row_img)[1],1)
-  padded_col_img <- cbind(cbind(cbind(zeros_col,cbind(zeros_col, padded_row_img)), zeros_col),zeros_col)
-  paded_img <- array(rep(padded_col_img ,c), dim = c(dim(padded_col_img)[1],dim(padded_col_img)[2],c))
+  p <- (dim(filter)[1]-1)/2
+  zero_pad <-matrix(0,p,p)
+  paded_img <- bdiag(zero_pad,img[,,1],zero_pad)
+  paded_img <- array(rep(paded_img ,c), dim = c(dim(paded_img)[1],dim(paded_img)[2],c))
   
   #make filter size a variable for flexibility
   k <- dim(filter)[1]
   
+  # convolutional operation 
   for (row in 1:n){
     for (col in 1:m){
       local <- paded_img[row:(row+k-1), col:(col+k-1),1]
@@ -463,7 +462,7 @@ Comparing original image, black and white image, and smoothed image
 ```{r echo=FALSE, fig.align='default', fig.show='hold', out.width="33%"}
 # img <- readPNG("monarch_in_may.png")
 # writeJPEG(black_white(img), target ="bw_monarch_in_may.jpeg")
-# writeJPEG(gaus_blur_ope(black_white(img), Gaussian_blur_1(5,1.4)), target ="smoothed_monarch_in_may.jpeg")
+# writeJPEG(gaus_blur_ope(black_white(img), Gaussian_filter(5,1.4)), target ="smoothed_monarch_in_may.jpeg")
 knitr::include_graphics(c("monarch_in_may.png","bw_monarch_in_may.jpeg", "smoothed_monarch_in_may.jpeg"))
 ```
 
@@ -481,12 +480,6 @@ convolu_ope <- function(img, filter=c("Prewitt", "Sobel","Scharr")){
   m <- dimension[2]
   c <- dimension[3]
   
-  #Zero padding 
-  zeros_row <- zeros(1,m)
-  padded_row_img <- rbind(rbind(zeros_row, img[,,1]), zeros_row)
-  zeros_col <- zeros(dim(padded_row_img)[1],1)
-  padded_col_img <- cbind(cbind(zeros_col, padded_row_img), zeros_col)
-  paded_img <- array(rep(padded_col_img ,c), dim = c(dim(padded_col_img)[1],dim(padded_col_img)[2],c))
   # define filters 
   if (filter == "Prewitt"){
     vertical_filter <- matrix(c(1,1,1, 0,0,0,-1,-1,-1),3,3)
@@ -499,8 +492,7 @@ convolu_ope <- function(img, filter=c("Prewitt", "Sobel","Scharr")){
     horizontal_filter <- t(vertical_filter)
   }else{
     if (class(filter) == c("matrix","array") & dim(filter)[1]==dim(filter)[2]){
-      vertical_filter <- flipdim(filter,1)
-      vertical_filter <- flipdim(vertical_filter,2)
+      vertical_filter <- filter
       horizontal_filter <- t(vertical_filter)
     }
     else{
@@ -509,12 +501,19 @@ convolu_ope <- function(img, filter=c("Prewitt", "Sobel","Scharr")){
     }
     
   }
-    # Add a matrix that store slope theta = arctan(horiz_score/-vert_score)
+  # Add a matrix that store slope theta = arctan(horiz_score/-vert_score)
   angle <- matrix(rep(1,n*m), n,m)
   
   #make filter size a variable for flexibility
   k <- dim(vertical_filter)[1]
   
+  #Zero padding 
+  p <- (dim(vertical_filter)[1]-1)/2
+  zero_pad <-matrix(0,p,p)
+  paded_img <- bdiag(zero_pad,img[,,1],zero_pad)
+  paded_img <- array(rep(paded_img ,c), dim = c(dim(paded_img)[1],dim(paded_img)[2],c))
+  
+  # convolutional operation with a nested for loop
   for (row in 1:n){
     for (col in 1:m){
       local <- paded_img[row:(row+k-1), col:(col+k-1),1]
@@ -526,7 +525,7 @@ convolu_ope <- function(img, filter=c("Prewitt", "Sobel","Scharr")){
     }
   }
   # Colors are represented as values between 0 and 1 in R. 
-  # Divide all the values by max to ensure that all the values are between 0       and 1
+  # Divide all the values by max to ensure that all the values are between 0 and 1
   img <- img/max(img)
   result <- list("image" = img, "angle"  = angle)
   
@@ -539,7 +538,7 @@ Let's see check the image after applying Sobel filter.
 
 ```{r echo=FALSE, fig.align='default', fig.show='hold', out.width="50%"}
 # img <- readPNG("monarch_in_may.png")
-# smooth_img <- gaus_blur_ope(black_white(img), Gaussian_blur_1(5,1.4))
+# smooth_img <- gaus_blur_ope(black_white(img), Gaussian_filter(5,1.4))
 # sobel_ope <- convolu_ope(smooth_img, "Sobel")
 # sobel_img <- sobel_ope$image
 # writeJPEG(sobel_img, target ="sobel_monarch_in_may.jpeg")
@@ -622,7 +621,7 @@ Below are images before and after non-max suppression(on the right).
 
 ```{r echo=FALSE, fig.align='default', fig.show='hold', out.width="50%"}
 # img <- readPNG("monarch_in_may.png")
-# smooth_img <- gaus_blur_ope(black_white(img), Gaussian_blur_1(5,1.4))
+# smooth_img <- gaus_blur_ope(black_white(img), Gaussian_filter(5,1.4))
 # sobel_ope <- convolu_ope(smooth_img, "Sobel")
 # sobel_img <- sobel_ope$image
 # sobel_ang <- sobel_ope$angle
@@ -637,9 +636,11 @@ knitr::include_graphics(c("sobel_monarch_in_may.jpeg", "non_max_monarch_in_may.j
 
 In this step, we first identify each pixels as strong, weak, or non-relevant. Next, we reset color values based on the classes. 
 
-* strong means higher than high threshold 
-* weak means between high and low threshold 
-* non-relevant means lower than low threshold 
+A pixel is classified as 
+
+* strong when the color value is higher than high threshold 
+* weak when the color value between high and low threshold 
+* non-relevant when the color value is lower than low threshold 
 
 ```{r include=FALSE}
 iden_str_weak <- function(img, weak_pix = 0.3, strong_pixel = 1, low = 0.05, high = 0.15){
@@ -662,7 +663,7 @@ Below are images before and after resetting color values based on the classes(on
 
 ```{r echo=FALSE, fig.align='default', fig.show='hold', out.width="50%"}
 # img <- readPNG("monarch_in_may.png")
-# smooth_img <- gaus_blur_ope(black_white(img), Gaussian_blur_1(5,1.4))
+# smooth_img <- gaus_blur_ope(black_white(img), Gaussian_filter(5,1.4))
 # sobel_ope <- convolu_ope(smooth_img, "Sobel")
 # sobel_img <- sobel_ope$image
 # sobel_ang <- sobel_ope$angle
@@ -701,7 +702,7 @@ Comparison of images from *Step 3*, *Step 4*, *Step 5*.
 
 ```{r echo=FALSE, fig.align='default', fig.show='hold', out.width="33%"}
 # img <- readPNG("monarch_in_may.png")
-# smooth_img <- gaus_blur_ope(black_white(img), Gaussian_blur_1(5,1.4))
+# smooth_img <- gaus_blur_ope(black_white(img), Gaussian_filter(5,1.4))
 # sobel_ope <- convolu_ope(smooth_img, "Sobel")
 # sobel_img <- sobel_ope$image
 # sobel_ang <- sobel_ope$angle
@@ -717,7 +718,7 @@ Finally, I defined a function `edge_detection` that does all the five steps toge
 
 ```{r include=FALSE}
 edge_detection <- function(img, filter, gau_blur_size = 5, gau_sigma = 1.4, weak_pix = 0.4, lowthreshold = 0.09,highthreshold = 0.17){
-  smooth_img <-gaus_blur_ope(black_white(img), Gaussian_blur_1(5,1.4))
+  smooth_img <-gaus_blur_ope(black_white(img), Gaussian_filter(5,1.4))
   result <- convolu_ope(smooth_img, filter)
   image <- result$image
   angle <- result$angle
