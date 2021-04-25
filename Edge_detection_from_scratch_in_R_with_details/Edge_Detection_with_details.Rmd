@@ -803,6 +803,7 @@ display_mt(iden_str_weak(Non_max_img))
 ```
 
 Below are images before and after resetting color values based on the classes(on the right).
+
 ```{r echo=FALSE, fig.align='default', fig.show='hold', out.width="50%"}
 # img <- readPNG("monarch_in_may.png")
 # smooth_img <- gaus_blur_ope(black_white(img), Gaussian_filter(5,1.4))

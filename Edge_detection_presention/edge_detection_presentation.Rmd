@@ -313,11 +313,12 @@ I defined a function `edge_detect` that combine all the steps above. It takes th
 
 
 ```{r echo=FALSE, fig.align='default', fig.show='hold', out.width="25%"}
-# writeJPEG(edge_detect("minions2.jpeg", type = "jpeg", filter = "Prewitt"), target ="prewitt_minions2.jpeg")
-# writeJPEG(edge_detect("minions2.jpeg", type = "jpeg", filter = "Sobel"), target ="sobel_minions2.jpeg")
-# writeJPEG(edge_detect("minions2.jpeg", type = "jpeg", filter = "Scharr"), target ="scharr_minions2.jpeg")
+# writeJPEG(edge_detect("minions_new.png", type = "png", filter = "Prewitt"), target ="prewitt_minions2.png")
+# writeJPEG(edge_detect("minions_new.png", type = "png", filter = "Sobel"), target ="sobel_minions2.jpeg")
+# writeJPEG(edge_detect("minions_new.png", type = "png", filter = "Scharr"), target ="scharr_minions2.jpeg")
 knitr::include_graphics(c("prewitt_minions2.jpeg","sobel_minions2.jpeg", "scharr_minions2.jpeg"))
 ```
+
 
 I don't see much difference here with these three classic filters. What about other filters? 
 
