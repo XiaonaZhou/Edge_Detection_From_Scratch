@@ -1,5 +1,5 @@
 ---
-title: "Edge Detection from Scratch Presentation"
+title: "Edge Detection from Scratch"
 author: "Xiaona Zhou \n Mentor: Prof. Boyan Kostadinov"
 date: "Last edited: `r format(Sys.time(), '%B %d %Y')`"
 output:
@@ -19,22 +19,22 @@ library(pracma)
 library(Matrix)
 ```
 
-# Edge detection through convolutional operation
+# Edge detection through convolution operation
 
-**In this presentation, I'll show how to get the edge image on the right with convolutional operation.**
+**In this presentation, I'll show how to get the edge image on the right with convolution operation.**
 ```{r echo=FALSE, fig.align='default', fig.show='hold', out.width="30%"}
 knitr::include_graphics(c("minions2.jpeg","edge_img_example.jpeg"))
 ```
 
-**First of all, what is convolutional operation?**
+**First of all, what is convolution operation?**
 
-Let's say we have a 6x6 matrix and a 3x3 filter. To perform convolutional operation, we would loop over the 6x6 matrix with our filter. For example, we'll first locate a 3x3 matrix on the 6x6 matrix, and we are going to get the sum of the element-wise products of the filter and the 3x3 matrix we located. We repeat this process until we looped through the entire matrix. 
+Let's say we have a 6x6 matrix and a 3x3 filter. To perform convolution operation, we would loop over the 6x6 matrix with our filter. For example, we'll first locate a 3x3 matrix on the 6x6 matrix, and we are going to get the sum of the element-wise products of the filter and the 3x3 matrix we located. We repeat this process until we looped through the entire matrix. 
 
-![Convolutional operation example](Convolution_operation_example.PNG)
+![Convolution operation example](Convolution_operation_example.PNG)
 
 
 
-![Convolitional Operation in action](convol_op_act.gif)
+![Convolition Operation in action](convol_op_act.gif)
 
 **Let's see some simple edge detection examples in Python.**
 
@@ -42,14 +42,14 @@ Let's say we have a 6x6 matrix and a 3x3 filter. To perform convolutional operat
 [Jupyter notebook](https://github.com/XiaonaZhou/Edge_Detection_From_Scratch/blob/main/Simple_Edge_Detection_Demonstration_in_Python/Edge%20Detection%20demonstration%20.ipynb)
 
 
-**Now, we know what convolutional operation is, let's get started on detecting the edges.**
+**Now, we know what convolution operation is, let's get started on detecting the edges.**
 
 ## Steps needed for edge detection
 
 1. Load image as an array with `readJPEG` or `readPNG`
 2. Convert image to black and white
 3. Pick a filter 
-4. Apply convolutional operation with a nested for loop.
+4. Apply convolution operation with a nested for loop.
 
 
 ### Step 1: Load image
@@ -145,7 +145,7 @@ horizontal_filter
 
 
 
-### Step 4: Apply convolutional operation with a nested for loop.
+### Step 4: Apply convolution operation with a nested for loop.
 
 Main idea:
 
@@ -441,7 +441,7 @@ gaus_blur_ope <- function(img, filter){
   #make filter size a variable for flexibility
   k <- dim(filter)[1]
   
-  # convolutional operation 
+  # convolution operation 
   for (row in 1:n){
     for (col in 1:m){
       local <- paded_img[row:(row+k-1), col:(col+k-1),1]
@@ -514,7 +514,7 @@ convolu_ope <- function(img, filter=c("Prewitt", "Sobel","Scharr")){
   paded_img <- bdiag(zero_pad,img[,,1],zero_pad)
   paded_img <- array(rep(paded_img ,c), dim = c(dim(paded_img)[1],dim(paded_img)[2],c))
   
-  # convolutional operation with a nested for loop
+  # convolution operation with a nested for loop
   for (row in 1:n){
     for (col in 1:m){
       local <- paded_img[row:(row+k-1), col:(col+k-1),1]
@@ -559,7 +559,7 @@ There are only two outcomes for each pixel.
 1. We keep the value of the pixel when it is the maximum in the edge direction
 2. We set the value to 0 when it is not the maximum. 
 
-Each pixel in the image has a color value and angle value (we calculated the angle value along with the convolutional operation, it equals to $arctan(\frac{\text{hori_score}}{\text{-verti_score}})$)
+Each pixel in the image has a color value and angle value (we calculated the angle value along with the convolution operation, it equals to $arctan(\frac{\text{hori_score}}{\text{-verti_score}})$)
 
 Each pixel is surrounded by other 8 pixels. The pixel at the center is compared with the other two pixels. Which two? It depends on the angle of the pixel. See below. 
 
@@ -775,3 +775,8 @@ Below is a simple convolutional neural network diagram shows the basic structure
 #[brilliant.org](https://brilliant.org/wiki/convolutional-neural-network/)
 ```
 
+# Face Recognition and Object Detection Implementation 
+
+## Face Recognition System using FaceNet
+
+## Object Detection with YOLO
